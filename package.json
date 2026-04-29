@@ -1,0 +1,13 @@
+{
+  "name": "ai-agent-demo",
+  "version": "1.0.0",
+  "description": "AI Agent 模块演示 - 真实对话 Agent",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.37.0",
+    "express": "^4.18.0"
+  }
+}
