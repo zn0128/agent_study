@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI Agent Pipeline 流程图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:'Consolas','SF Mono','Courier New',monospace;
+  font-size:12px;padding:32px;min-height:100vh}
+
+.diagram{max-width:920px;margin:0 auto}
+
+h1{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:#475569;margin-bottom:6px}
+.subtitle{font-size:11px;color:#334155;margin-bottom:32px}
+
+/* ── Node ── */
+.node{display:flex;align-items:center;gap:10px;padding:9px 14px;
+  border-radius:6px;border:1px solid;position:relative}
+.node .sn{font-size:10px;color:#334155;font-weight:700;min-width:32px;flex-shrink:0}
+.node .nm{font-weight:700;white-space:nowrap}
+.node .nd{color:#475569;font-size:11px;margin-left:8px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.node .tag{margin-left:auto;font-size:10px;padding:2px 6px;border-radius:3px;
+  flex-shrink:0;white-space:nowrap}
+
+/* Node colors */
+.u {background:rgba(148,163,184,.08);border-color:rgba(148,163,184,.25);color:#cbd5e1}
+.c {background:rgba(59,130,246,.1); border-color:rgba(59,130,246,.35); color:#93c5fd}
+.k {background:rgba(139,92,246,.1); border-color:rgba(139,92,246,.35); color:#c4b5fd}
+.a {background:rgba(249,115,22,.1); border-color:rgba(249,115,22,.35); color:#fdba74}
+.e {background:rgba(34,197,94,.1);  border-color:rgba(34,197,94,.35);  color:#86efac}
+.r {background:rgba(239,68,68,.1);  border-color:rgba(239,68,68,.35);  color:#fca5a5}
+.l {background:rgba(59,130,246,.14);border-color:#3b82f6;              color:#bfdbfe}
+.l .nm{color:#60a5fa}
+.l .sn{color:#3b82f6}
+
+/* ── Connectors ── */
+.down{width:1px;height:20px;background:#1e293b;margin:0 auto;position:relative}
+.down::after{content:'▼';color:#1e293b;font-size:9px;
+  position:absolute;bottom:-8px;left:-4px}
+.dlabel{text-align:center;font-size:10px;color:#334155;padding:2px 0}
+
+/* ── Branch ── */
+.branch{display:flex;gap:12px;border:1px solid #1e293b;border-radius:8px;overflow:hidden}
+.bcol{flex:1;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bcol.left{border-right:1px solid #1e293b}
+.btitle{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:#334155;padding-bottom:8px;
+  border-bottom:1px solid #1e293b;margin-bottom:2px;display:flex;
+  align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.green{background:#22c55e}.dot.yellow{background:#f59e0b}
+
+.skip-node{flex:1;display:flex;align-items:center;justify-content:center;
+  color:#334155;font-size:11px;border:1px dashed #1e293b;border-radius:4px;
+  min-height:60px;margin-top:4px}
+
+/* ── Merge ── */
+.merge{text-align:center;font-size:10px;color:#475569;
+  padding:6px 0 4px;display:flex;align-items:center;gap:8px;
+  justify-content:center}
+.merge::before,.merge::after{content:'';flex:1;height:1px;background:#1e293b}
+
+/* ── ReAct Loop Box ── */
+.loop-box{border:1px dashed rgba(59,130,246,.3);border-radius:8px;
+  padding:16px;position:relative;margin:4px 0}
+.loop-title{position:absolute;top:-9px;left:12px;background:#0f172a;
+  padding:0 8px;font-size:10px;color:#3b82f6;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em}
+
+.loop-cols{display:flex;gap:16px}
+.loop-main{flex:1;display:flex;flex-direction:column;gap:8px}
+.loop-side{width:260px;display:flex;flex-direction:column;gap:6px}
+
+.loop-condition{font-size:10px;color:#475569;display:flex;
+  align-items:center;gap:6px;padding:4px 0}
+.loop-condition::before{content:'';width:24px;height:1px;background:#1e293b}
+
+.tool-chain{display:flex;flex-direction:column;gap:6px}
+.tool-chain-title{font-size:10px;color:#334155;text-transform:uppercase;
+  letter-spacing:.05em;padding-bottom:4px;border-bottom:1px solid #1e293b}
+.tool-step{display:flex;align-items:center;gap:6px}
+.tool-step .arr{color:#334155;font-size:10px}
+.mini-node{display:flex;align-items:center;gap:6px;padding:5px 8px;
+  border-radius:4px;border:1px solid;font-size:11px;flex:1}
+.mini-node .mn{font-weight:700;white-space:nowrap}
+.mini-node .md{color:#475569;font-size:10px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;margin-left:4px}
+
+.hitl-note{display:flex;align-items:center;gap:6px;
+  padding:6px 8px;border-radius:4px;border:1px dashed rgba(239,68,68,.3);
+  background:rgba(239,68,68,.05);font-size:10px;color:#fca5a5;margin-top:2px}
+
+.loop-back{display:flex;align-items:center;gap:6px;
+  font-size:10px;color:#475569;padding:6px 0 0;
+  border-top:1px dashed #1e293b;margin-top:2px}
+.loop-back .arr{color:#3b82f6;font-size:13px}
+.endturn{display:flex;align-items:center;gap:6px;font-size:11px;
+  color:#86efac;padding:4px 0}
+.endturn::before{content:'✓';color:#22c55e}
+
+/* ── Legend ── */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;
+  padding-top:16px;border-top:1px solid #1e293b}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:#475569}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+/* ── Inline annotations ── */
+.ann{font-size:10px;padding:2px 6px;border-radius:3px}
+.ann.red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.ann.blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.ann.green{background:rgba(34,197,94,.15);color:#86efac}
+
+.row-with-note{display:flex;align-items:center;gap:10px}
+.row-with-note .node{flex:1}
+
+.time-badge{font-size:10px;background:#1e293b;border:1px solid #334155;
+  color:#475569;padding:1px 6px;border-radius:3px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="diagram">
+
+<h1>AI Agent · Pipeline 流程图</h1>
+<div class="subtitle">以"帮我写一份 AI Agent 架构分析报告"为例 · 复杂任务路径（Plan-and-Execute）</div>
+
+<!-- ═══ INPUT ═══ -->
+<div class="node u">
+  <span class="sn">INPUT</span>
+  <span class="nm">👤 用户输入</span>
+  <span class="nd">message · sessionId · apiKey → POST /api/chat</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 1: GUARDRAILS INPUT ═══ -->
+<div class="row-with-note">
+  <div class="node r">
+    <span class="sn">01</span>
+    <span class="nm">🛡️ Guardrails</span>
+    <span class="nd">正则扫描 · 破坏性操作 / 提示词注入 / 角色覆盖</span>
+    <span class="tag ann red">输入护栏</span>
+  </div>
+  <span style="font-size:11px;color:#334155">→</span>
+  <span class="ann red" style="white-space:nowrap">⛔ 命中规则 → 直接拦截，不消耗 API</span>
+</div>
+
+<div class="dlabel">↓ safe = True</div>
+
+<!-- ═══ STEP 2: MEMORY ═══ -->
+<div class="node k">
+  <span class="sn">02</span>
+  <span class="nm">💾 Memory 三层检索</span>
+  <span class="nd">L1: session_facts (RAM) · L2+3: TF-IDF cosine → memories.json</span>
+  <span class="tag ann blue" style="margin-left:auto">持久化库 + 向量索引</span>
+</div>
+
+<div class="dlabel">↓ session_facts[] + vector_hits[]（带相关度分数）</div>
+
+<!-- ═══ STEP 3: PROMPT ═══ -->
+<div class="node c">
+  <span class="sn">03</span>
+  <span class="nm">✍️ Prompt 构建</span>
+  <span class="nd">角色定义 + 工具规则 8 条 + 注入记忆 → sys_prompt</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 4: CONTEXT ═══ -->
+<div class="node c">
+  <span class="sn">04</span>
+  <span class="nm">📄 Context 统计</span>
+  <span class="nd">估算 token 占用 · 组装 messages[] · 截取最近 8 轮历史</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 5: PLANNING ═══ -->
+<div class="node c">
+  <span class="sn">05</span>
+  <span class="nm">💭 Planning</span>
+  <span class="nd">关键词匹配：分析/报告/制定/规划/总结/研究/帮我写</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ BRANCH ═══ -->
+<div class="branch">
+  <!-- Simple -->
+  <div class="bcol left">
+    <div class="btitle"><span class="dot green"></span>简单任务 · CoT / ReAct</div>
+    <div class="skip-node">⤷ 直接进入 LLM 主循环</div>
+  </div>
+
+  <!-- Complex -->
+  <div class="bcol">
+    <div class="btitle"><span class="dot yellow"></span>复杂任务 · Plan-and-Execute</div>
+
+    <!-- Workflow -->
+    <div class="node e" style="padding:7px 12px">
+      <span class="sn">06</span>
+      <span class="nm">🔄 Workflow（本地）</span>
+      <span class="nd">提取话题 → 知识检索 → 新闻判断</span>
+    </div>
+
+    <div class="dlabel" style="text-align:left;padding-left:16px">↓ wf_context（预检索结果）</div>
+
+    <!-- Orchestrator -->
+    <div class="node e" style="padding:7px 12px">
+      <span class="sn">07</span>
+      <span class="nm">🎯 Orchestrator</span>
+      <span class="nd">流式调度 SubAgent · 逐步 yield 事件</span>
+    </div>
+
+    <div class="down"></div>
+
+    <!-- LLM #1 -->
+    <div class="node l" style="padding:7px 12px">
+      <span class="sn">LLM①</span>
+      <span class="nm">🧠 decompose_task()</span>
+      <span class="nd">Claude API · 生成子任务列表</span>
+      <span class="time-badge">~3s</span>
+    </div>
+
+    <div class="down"></div>
+
+    <!-- LLM #2 -->
+    <div class="node l" style="padding:7px 12px">
+      <span class="sn">LLM②</span>
+      <span class="nm">🧠 SubAgent #1</span>
+      <span class="nd">独立 Context + 专项系统提示 · 执行子任务</span>
+      <span class="time-badge">~5s</span>
+    </div>
+
+    <div class="down"></div>
+
+    <!-- LLM #3 -->
+    <div class="node l" style="padding:7px 12px">
+      <span class="sn">LLM③</span>
+      <span class="nm">🧠 SubAgent #2</span>
+      <span class="nd">独立 Context + 专项系统提示 · 执行子任务</span>
+      <span class="time-badge">~5s</span>
+    </div>
+  </div>
+</div>
+
+<!-- Merge -->
+<div class="merge">注入 messages：SubAgent 结果[:800] + Workflow 上下文[:400] + 指令</div>
+
+<!-- ═══ LLM MAIN LOOP ═══ -->
+<div class="loop-box">
+  <div class="loop-title">⟳ LLM 主循环 · ReAct · 最多 5 轮</div>
+  <div class="loop-cols">
+
+    <!-- Left: LLM decision flow -->
+    <div class="loop-main">
+      <div class="node l">
+        <span class="sn">LLM④</span>
+        <span class="nm">🧠 主 Agent 推理</span>
+        <span class="nd">claude-haiku-4-5 · max_tokens=2048（复杂）/ 1024</span>
+      </div>
+
+      <div class="loop-condition">stop_reason = <strong style="color:#f97316">tool_use</strong> → 进入工具链（右侧）→ 结果回传，继续推理</div>
+      <div class="loop-condition">stop_reason = <strong style="color:#22c55e">end_turn</strong> → 退出循环</div>
+      <div class="loop-condition">stop_reason = <strong style="color:#f59e0b">max_tokens</strong> → 收集所有 text 块，退出循环</div>
+
+      <div class="loop-back">
+        <span class="arr">↩</span>
+        tool_result 追加到 cursor，re-enter LLM（iter_i + 1）
+      </div>
+
+      <div class="endturn">final_text 写入，进入下一阶段</div>
+    </div>
+
+    <!-- Right: Tool chain -->
+    <div class="loop-side">
+      <div class="tool-chain">
+        <div class="tool-chain-title">工具调用链（tool_use 时触发）</div>
+
+        <div class="tool-step">
+          <span class="arr">①</span>
+          <div class="mini-node r">
+            <span class="mn">👤 HITL</span>
+            <span class="md">memory write → 审核</span>
+          </div>
+        </div>
+
+        <div class="tool-step">
+          <span class="arr">②</span>
+          <div class="mini-node a">
+            <span class="mn">🔌 MCP</span>
+            <span class="md">协议路由 + 调用日志</span>
+          </div>
+        </div>
+
+        <div class="tool-step">
+          <span class="arr">③</span>
+          <div class="mini-node k">
+            <span class="mn">📚 RAG</span>
+            <span class="md">knowledge_base / memory_bank</span>
+          </div>
+        </div>
+
+        <div class="tool-step">
+          <span class="arr">④</span>
+          <div class="mini-node a">
+            <span class="mn">🔧 Tools</span>
+            <span class="md">calculate / datetime / news…</span>
+          </div>
+        </div>
+
+        <div class="tool-step">
+          <span class="arr">⑤</span>
+          <div class="mini-node a">
+            <span class="mn">⭐ Skills</span>
+            <span class="md">knowledge_integration / news_digest…</span>
+          </div>
+        </div>
+
+        <div class="hitl-note">
+          🔒 save_to_memory / add_to_memory_bank<br>
+          触发 HITL · await asyncio.Event()<br>
+          POST /api/hitl/{id}/approve or reject
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 8: GUARDRAILS OUTPUT ═══ -->
+<div class="row-with-note">
+  <div class="node r">
+    <span class="sn">08</span>
+    <span class="nm">🛡️ Guardrails</span>
+    <span class="nd">扫描输出：API Key 泄露 / 密码信息</span>
+    <span class="tag ann red">输出护栏</span>
+  </div>
+  <span style="font-size:11px;color:#334155">→</span>
+  <span class="ann red" style="white-space:nowrap">命中 → 替换为提示文本</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 9: MEMORY UPDATE ═══ -->
+<div class="node k">
+  <span class="sn">09</span>
+  <span class="nm">💾 Memory 更新</span>
+  <span class="nd">auto_extract_session() → 提取姓名等事实 → session_facts</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ STEP 10: EVALUATION ═══ -->
+<div class="node r">
+  <span class="sn">10</span>
+  <span class="nm">📊 Evaluation</span>
+  <span class="nd">base 0.72 + 工具 +0.10 + 长度 +0.10 + 格式 +0.03 ≤ 0.99</span>
+</div>
+
+<div class="down"></div>
+
+<!-- ═══ OUTPUT ═══ -->
+<div class="node u">
+  <span class="sn">OUTPUT</span>
+  <span class="nm">👤 用户输出</span>
+  <span class="nd">SSE event: text → 浏览器渲染 Markdown</span>
+</div>
+
+<!-- ═══ Legend ═══ -->
+<div class="legend">
+  <span style="font-size:10px;color:#334155;margin-right:4px">模块类型：</span>
+  <span class="leg"><span class="leg-dot" style="background:#3b82f6"></span>核心（LLM/Prompt/Planning）</span>
+  <span class="leg"><span class="leg-dot" style="background:#8b5cf6"></span>记忆知识（Memory/RAG）</span>
+  <span class="leg"><span class="leg-dot" style="background:#f97316"></span>行动（MCP/Tools/Skills）</span>
+  <span class="leg"><span class="leg-dot" style="background:#22c55e"></span>执行（Workflow/SubAgent）</span>
+  <span class="leg"><span class="leg-dot" style="background:#ef4444"></span>可靠性（Guardrails/HITL/Eval）</span>
+  <span class="leg"><span class="leg-dot" style="background:#60a5fa;border:1px solid #3b82f6"></span>LLM 调用（Claude API）</span>
+</div>
+
+</div>
+</body>
+</html>
